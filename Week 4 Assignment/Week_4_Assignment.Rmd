@@ -1,0 +1,150 @@
+---
+title: "Week 4 Assignment"
+author: "Nabila Hossain"
+date: "September 18, 2015"
+output: html_document
+---
+
+   
+Please create an R Markdown file that provides a solution for #4, #5 and #6 in Automated Data Collection in R, chapter 8.  Publish the R Markdown file to rpubs.com, and include links to your R Markdown file (in GitHub) and your rpubs.com URL In your assignment solution.
+
+![image](https://raw.githubusercontent.com/nabilahossain/Image/master/IS607Week4Assignment.jpg)<a name="A"/>
+
+* Answer 4:
+     * [Answer 4a](#1a)
+     * [Answer 4b](#1b)
+     * [Answer 4c](#1c)
+     * [Answer 4d](#1d)
+     * [Answer 4e](#1e)  
+* [Answer 5](#2)
+* Answer 6:
+     * [Answer 6a](#3a)
+     * [Answer 6b](#3b)
+     * [Answer 6c](#3c)
+
+
+__Answer 4:__  
+
+ * <a name="1a"/> __Answer 4a:__ `[0-9]+\\$` is a regular expression that means it will match any object where there is at least one digit before a `$` sign.
+
+_Example:_
+```{r}
+library(stringr)
+four.a <- c("Sue is 2$nd place", "Fred is 3", "550$", "5th is Jen", "Nile is number$ 9")
+unlist(str_extract(four.a, "[0-9]+\\$"))
+```
+
+
+[Up](#A)
+
+* <a name="1b"/> __Answer 4b:__ `\\b[a-z]{1,4}\\b` is a regular expression that means any match any cases where the object have letters from a to z (lower case), at least once but no more the 4 times. Meaning match the instance where there is one lower case letter or up to 4 letter words.
+
+_Example:_
+```{r}
+four.b <- "I think sunsets are very beautiful. The best place to see it is near a body of water."
+str_extract(four.b, "\\b[a-z]{1,4}\\b")
+unlist(str_extract_all(four.b, "\\b[a-z]{1,4}\\b"))
+```
+
+[Up](#A)
+
+* <a name="1c"/> __Answer 4c:__ `.*?\\.txt$` is a regular expression that means match any cases where the object ends in .txt. The first part of the expression `.*?` means does not matter what comes before `.txt`.
+
+_Example:_
+```{r}
+four.c <- c("web: abd/nyc.org/assignment.txt", "nml/like.edu/4txt.cvs", "cdn/fyc.com/four.txt")
+unlist(str_extract_all(four.c, ".*?\\.txt$")) 
+```
+
+
+[Up](#A)
+
+*  <a name="1d"/> __Answer 4d:__ `\\d{2}/\\d{2}/\\d{4}` is a regular expression that means two digits then two digits then four digits separated by `/`. Usually the this type of format can be used to get dates, two digit month and day and four digit year, in the format of dd/mm/yyyy or mm/dd/yyyy.
+
+_Example:_
+```{r}
+four.d <- "He was born on February 7th 1940. His father died on 07/18/1953. At the Age of 13/14 he had to drop out to school and start work. He had his first child on 01/06/1966. He boarded the ship on 12/24/1968."
+unlist(str_extract_all(four.d, "\\d{2}/\\d{2}/\\d{4}"))
+```
+
+
+
+[Up](#A)
+
+```{r, eval=FALSE}
+<(.+?)>.+?</\\1>
+```
+
+* <a name="1e"/> __Answer 4e:__ The regular expression above means to find the object inside `<>` in the beginning and the same `<>` with a `/` in the beginning of the object, later in the string. It is hard to explain so I will break down the regular expression above to show what it means part by part, with the example below. First look at the beginning `<(.+?)>`, which means to match any object surrounded by `<>` no matter it is text or numeric. Next, let's look at the last part in the `<>`. The `\\1` is back reference to the text in the beginning `.+?` enclosed in parenthesis `()`. So another way to see it is: match anything that we found inside `<>` in the first part and look for the a object that inside`<>` that has the same contain as before except with a `/` in the front. The middle `.+?` means that include anything that comes between the first and last part. As you can see on the bottom example: `R` matched `4ever21` and `/4ever21` enclosed in `<>` and everything in between the two object.
+
+
+_Example:_
+
+```{r}
+four.e <- c("This is <4ever21> an  example.  Not a long example </4ever21>. Very small example.")
+unlist(str_extract_all(four.e, "<(.+?)>.+?</\\1>"))
+```
+
+
+[Up](#A)
+
+__Answer 5:__
+  
+ <a name="2"/> `[0-9]+\\$` is a regular expression that I have rewritten as `[[:digit:]]{1,}[$]` . I use the expression `[[:digit:]]{1,}[$]` by enclosing the `[:digit:]` class in a `[]` to indicate  that we are looking for digits, same as saying `[0-9]`. I also added the `{1,}` to match the class one or more times, same as using a +. Then I used `[$]` to state that I am looking of $ in the vector, same as saying `\\$`.
+
+_Let's look at the same vector at answer four a:_
+```{r}
+four.a <- c("Sue is 2$nd place", "Fred is 1$2", "550$", "5th is Jen", "Nile is number$ 9")
+unlist(str_extract(four.a, "[0-9]+\\$"))
+unlist(str_extract(four.a, "[[:digit:]]{1,}[$]")) 
+```
+
+
+[Up](#A)
+
+__Answer 6: Consider the mail address chunkylover53[at]aol[dot]com.__  
+
+ * <a name="3a"/> __Answer 6a:__ I transform the above sting to a standard mail address using regular expression. I used the `stingr` package's `str_replace_all` function to replace `[at]` and `[dot]` to `@` and `.` respectively.
+
+```{r}
+six.a <- "Consider the mail address chunkylover53[at]aol[dot]com."
+six.a <- str_replace_all(six.a, pattern = "\\[at]", replacement = "@")
+six.a <- str_replace_all(six.a, pattern = "\\[dot]", replacement = ".")
+six.a
+```
+
+
+[Up](#A)
+
+* <a name="3b"/> __Answer 6b:__ To extract the digits in the mail address we first try to use `[:digit:]` but that does not work as you can see below. It only gives us one digit at a time. It shows "5" and "3" not "53" which we want.
+
+```{r}
+unlist(str_extract_all(six.a, "[:digit:]"))
+```
+
+
+Then I use the expression `[[:digit:]]{1,}` which gives us the correct number "53". I enclose the `[:digit:]` in a `[]` to indicate that we are looking at the predefined class `[:digit:]`. I also added the `{1,}` to match the class one or more times.
+
+```{r}
+unlist(str_extract_all(six.a, "[[:digit:]]{1,}"))
+```
+
+
+[Up](#A)
+
+* <a name="3c"/> __Answer 6c:__ We want to extract the digits from the mail without using the predefined class `[:digit:]`. First we try using `\\D` to get the digits but it does not work out as we can see below.
+
+```{r}
+unlist(str_extract_all(six.a, "\\D"))
+```
+
+The reason `\\D` does not give us any digit is because the expression is the same as `[^[:digit:]]`, which means any characters __except__ digits. The correct way to write is with a lower case d not an upper case D, like: `\\d` . 
+
+I use the expression `\\d{1,}` which gives us the number "53". I use `\\d` to get all the digits. I also added the `{1,}` to match previous case one or more times.
+
+```{r}
+unlist(str_extract_all(six.a, "\\d{1,}"))
+```
+
+
+[Up](#A)
