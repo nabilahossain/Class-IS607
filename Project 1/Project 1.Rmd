@@ -20,7 +20,7 @@ __In this project, you're given a text file with chess tournament results where 
 * ####[Created the final Chess Tournament Table using `sqldf` by joining table1 and table4 (Chess_Tournament).](#9)  
 * ####[Creating a `.CSV` file in the local GitHub repository and the link to the online repository.](#10)  
 
-<a name="1"/>__First I uploaded the Chess Tournament text file into my GitHub _Project 1_ repository. Using the package `RCurl` I uploaded the Chess Tournament from online.__
+<a name="1"/>__First I uploaded the Chess Tournament text file into my GitHub _Project 1_ repository. Using the package `RCurl` I uploaded the Chess Tournament from [online](https://github.com/nabilahossain/Class-IS607/blob/master/Project%201/tournamentinfo.txt) (right click on the link to view the original file).__
 ```{r}
 library(RCurl)
 chess <- getURL("https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Project%201/tournamentinfo.txt")
