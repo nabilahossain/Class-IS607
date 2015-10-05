@@ -1,0 +1,153 @@
+---
+title: "Week 6 Assignment"
+author: "Nabila Hossain"
+date: "October 3, 2015"
+output: html_document
+---
+
+__The chart below describes arrival delays for two airlines across five destinations.__  
+
+![image](https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Week%206%20Assignment/Arrival%20Delays.jpg)<a name="A"/>  
+
+* __Part 1: Create a .CSV file (or optionally, a MySQL database!) that includes all of the information above:__
+     * [Creating tables using `sqldf`.](#1a)  
+     * [Transforming the tables to make them "wide" structure tables.](#1b)  
+     * [Combining the tables and creating a .CSV file in GitHub.](#1c)   
+* __Part 2: Read the information from your .CSV file into R, and use tidyr and dplyr as needed to tidy and transform your "data":__   
+     * [Read .CSV file form GitHub.](#2a)  
+     * [Using `dplyr` and `tidyr` packages to transform and tidy my table.](#2b)  
+     * [More tiding and transforming data to find the total flights and percent of flights that were delayed.](#2c)  
+* __Part 3: Perform analysis to compare the arrival delays for the two airlines:__   
+     * [Using `knitr` and `ggplot2` pacakges to compare the arrival delays for the five destinations.](#3a)  
+     * [Compare the arrival delays of two airlines as a whole.](#3b)  
+     * [Conclusion](#3c)     
+       
+
+####Part 1:       
+
+* <a name="1a"/>__Using the library `sqldf` I created two tables, Alaska and AM West. I decides to create two tables using the chart above with unique numbers instead of one table. I did this to keep the information about each airlines separate. This way I could later combine the two tables to create the chart shown above. Another reason for my decision toward creating two tables instead of one is because I thought that is how it would look like in a database.__
+
+
+```{r}
+library(sqldf)
+library(tidyr)
+library(dplyr)
+
+Alaska <-sqldf(c("Drop table if exists alaska","CREATE table alaska ( ID serial PRIMARY KEY, Destination VARCHAR (25) NOT NULL, On_Time int NOT NULL, Delayed int NOT NULL)",
+  "INSERT INTO alaska (ID, Destination, On_Time, Delayed) Values ('1','Los Angeles','497','62'), ('2','Phoenix','221','12'), ('3','San Diego','212','20'), ('4','San Francisco','503','102'), ('5','Seattle','1841','305')", "Select * From alaska"))
+Alaska
+AM_West <-sqldf(c("Drop table if exists AM_West","CREATE table AM_West ( ID serial PRIMARY KEY, Destination VARCHAR (25) NOT NULL, On_Time int NOT NULL, Delayed int NOT NULL)",
+  "INSERT INTO AM_West (ID, Destination, On_Time, Delayed) Values ('1','Los Angeles','694','117'), ('2','Phoenix','4840','415'), ('3','San Diego','383','65'), ('4','San Francisco','320','129'), ('5','Seattle','201','61')", "Select * From AM_West"))
+AM_West
+```
+
+[Up](#A)
+
+* <a name="1b"/>__Using `R` and `dplyr` package I transform the two tables into "wide" structure tables. First, I transpose the tables, to switch the columns and rows. Then I change the column names with the information from the first row and then delete the first row. You can see below how the two tables looked after the transformations.__
+ 
+```{r}
+Alaska1 <- Alaska %>% select(-ID) %>% t()
+colnames(Alaska1) <- Alaska1[1,]
+Alaska1 <- Alaska1[-1,]
+Alaska1
+AM_West1 <- AM_West %>% select(-ID) %>% t()
+colnames(AM_West1) <- AM_West1[1,]
+AM_West1 <- AM_West1[-1,]
+AM_West1
+```
+
+[Up](#A)  
+
+* <a name="1c"/>__I created a vector Airlines, to put the name of the airlines in the final table. Using `rbind` and `cbind` I combined the vector and the two tables to create the final table: Airlines_Table. Airlines Table looks very similar to the original chart. I finally created a .CSV file with the Airlines Table and uploaded it in my local GitHub repository.__
+ 
+```{r}
+Airlines <- c("Alaska", "Alaska", "AM West", "AM West")
+Airlines_Table <- rbind(Alaska1, AM_West1)
+Airlines_Table <- cbind(Airlines, Airlines_Table)
+Airlines_Table
+write.csv(Airlines_Table, file = "C:/Users/Nabila/Documents/GitHub/Class-IS607/Week 6 Assignment/Airlines_Table.csv")
+```
+
+[Up](#A)  
+
+####Part 2:    
+
+* <a name="2a"/>__Using the library `curl` I uploaded the airlines table from my online GitHub repository.__
+
+```{r}
+library(curl)
+airtable <- read.csv(file="https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Week%206%20Assignment/Airlines_Table.csv", header=TRUE, sep=",")
+airtable
+```
+
+[Up](#A)  
+
+
+* <a name="2b"/>__Using libraries `dplyr`,`tidyr` and `stringr` I transform and tidy my table. I first transform my table from "wide" structure to "long" structure. I also reorder my columns and rename them. I also use `str_replace` to tidy up the data more.__
+
+```{r}
+library(stringr)
+airtable1 <- airtable %>%  gather("Destination", "Number_of_Flights", 3:7) %>% select(Airlines, Arrival=X, Destination, Number_of_Flights) 
+airtable1$Destination <- str_replace_all(airtable1$Destination, pattern = "\\.", replacement = " ")
+airtable1
+```
+
+[Up](#A)  
+
+
+* <a name="2c"/>__First, I find the sum of arriving flights by airlines and destinations, using the `group_by` and `summarize` functions and create a table. Second, I used the `mutate` and `filter` functions to create another table that only has the information about the airrval delay planes. Then using multiple functions found in `dplyr` packages I joined the two tables, and created a new table which only contains the information about airlines, destination, total flights, delayed flights and percent delayed for each destination by airlines.__
+
+```{r}
+at2 <- airtable1 %>% group_by(Airlines, Destination) %>% summarise(Total_Flights = sum(Number_of_Flights)) 
+at2
+at3 <- mutate(filter(airtable1, Arrival %in% "Delayed"))
+at3
+Airline_Delay <- at3 %>% select(Airlines, Destination,  Delayed_Flights=Number_of_Flights) %>% inner_join(at2, by = c("Destination", "Airlines")) %>% arrange(Airlines) %>% mutate(Percent_Delayed = (Delayed_Flights / Total_Flights)*100)
+Airline_Delay$Percent_Delayed <-  as.numeric(format(round(Airline_Delay$Percent_Delayed, 2), nsmall=2))
+Airline_Delay
+```
+
+[Up](#A)  
+
+####Part 3:    
+
+* <a name="3a"/>__Here I used the packages `knitr` and `ggplot2` to further analyze my findings. By looking at the table below we see that the percent of delayed planes varies from 5% to 29% by each destination the airlines travel to. By looking at the table we see that AM West Airlines have higher percentages of delayed flights then Alaska, by destinations.__ 
+
+```{r}
+library(ggplot2)
+library(knitr)
+Airline_Delay1 <- Airline_Delay
+Airline_Delay1$Percent_Delayed <- paste(Airline_Delay1$Percent_Delayed, "%", sep="")
+rownames(Airline_Delay1) <- NULL
+kable(Airline_Delay1, caption = "Table 1: Alaska and AM West planes' arrival delays across five destinations.", align = "c")
+```
+
+__I compare the two airlines side by side on the graphs below. We see in the bar graph that for each destination, the arrival delays for AM West airlines is more then Alaska airlines. On the line graph we see that Seattle has the highest percentage difference between the two airlines, almost 9% difference. In Seattle 23.28% of the AM West planes have arrival delays, while 14.21% of the Alaska planes have arrival delays.__
+
+```{r}
+ggplot(data = Airline_Delay, aes(x = Destination, y = Percent_Delayed, fill = Airlines)) + geom_bar(stat="identity", position="dodge") + ggtitle("Graph 1: The Percentage of Arrival Delays Across Five Destination") + ylab("Percentage of Planes Delayed")
+
+ggplot(data = Airline_Delay, aes(x = Destination, y = Percent_Delayed, group=Airlines, color = Airlines)) +  geom_line() + geom_point() + ggtitle("Graph 2: The Percentage of Arrival Delays Across Five Destination") + ylab("Percentage of Planes Delayed")
+      
+```
+
+[Up](#A)  
+
+
+* <a name="3b"/>__After looking at the arrival delays across the five destination for the two airlines, I wanted to look at the two airlines as a whole. Therefore I created another table, with only the information about the total flights, total delays, and percent delays by airlines. Surprisingly, I found that Alaska airlines have about 3% more planes than AM West airlines that have arrival delays.__
+
+
+```{r}
+Airline_Delay2 <- Airline_Delay %>% group_by(Airlines) %>% summarise(Delayed_Flights = sum(Delayed_Flights), Total_Flights = sum(Total_Flights)) %>% mutate(Percent_Delayed = (Delayed_Flights / Total_Flights)*100)
+Airline_Delay2$Percent_Delayed <- as.numeric(format(round(Airline_Delay2$Percent_Delayed, 2), nsmall=2))
+rownames(Airline_Delay2) <- NULL
+kable(Airline_Delay2, caption = "Table 2: Alaska and AM West planes' arrival delays.", align = "c")
+ggplot(data = Airline_Delay2, aes(x = Airlines, y = Percent_Delayed, fill = Airlines)) + geom_bar(stat="identity", position="dodge") + ggtitle("Graph 3: The Percentage of Arrival Delays for the Airlines") + ylab("Percentage of Planes Delayed")
+```
+
+
+[Up](#A)  
+
+####Conclusion:   
+
+* <a name="3c"/>__After performing transformation and data analysis we can see that AM West airlines, has the most arrival delays across all five destinations. However when we compare the airlines as the total arrival delays in percentage, we see that Alaska has higher rate of delayed arrivals then AM West. It was a surprise, to see this information. At first I thought my code was not working, however after going over the data again, it does make sense. AM West airlines have twice the amount of planes going to the five destination then Alaska airlines. I would like to look at the data for these two airlines and all of their destinations' arrival delays and compare the airlines as a whole.__
