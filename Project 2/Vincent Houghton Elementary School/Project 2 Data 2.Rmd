@@ -1,0 +1,124 @@
+---
+title: "Vincent Houghton Elementary School (Grade 5)"
+author: "Nabila Hossain"
+date: "October 11, 2015"
+output: html_document
+---
+
+__The chart below describes the grades of fourteen students from 5th grade of Vincent Houghton Elementary school. It contains the student's grade from five subjects and the number of days they were present in school.__
+
+![image](https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Project%202/Vincent%20Houghton%20Elementary%20School/Vincent%20Houghton%20(Grade%205).bmp)<a name="A"/>  
+ 
+
+* __Part 1: Create a .CSV file that includes all of the information above:__
+    * [Install all the packages that will be used in this project.](#1a)  
+    * [Created a .CSV file using Excel and uploaded it to GitHub.](#1b)   
+* __Part 2: Read the information from your .CSV file into R, and use tidyr and dplyr as needed to tidy and transform your "data":__   
+     * [Read the .CSV file form GitHub.](#2a)  
+     * [Used `dplyr` and `tidyr` packages to transform and tidy the data.](#2b)  
+     * [More tiding and transforming data.](#2c)  
+* __Part 3: Perform analysis on the "data":__   
+     * [Found the correlation between the data as a whole and graphed it using `ggplot2`.](#3a)  
+     * [Found the correlation between the data by subject.](#3b) 
+     * [Found the correlation between average grade and days present.](#3c)      
+
+
+####Part 1:       
+
+* <a name="1a"/>__Installing all the necessary packages needed for this data analysis.__
+
+```{r}
+library(curl)
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+```
+
+[Up](#A)  
+
+* <a name="1b"/>__I created a .CSV file using Microsoft Excel with the data of grade of 5th grade students in Vincent Houghton Elementary School in my local GitHub repository.__
+
+####Part 2:    
+
+* <a name="2a"/>__Using the library `curl` I uploaded the table from my online GitHub repository.__
+
+```{r}
+Vincent_Grade_5 <- read.csv(file="https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Project%202/Vincent%20Houghton%20Elementary%20School/Vincent%20Houghton%20(Grade%205).csv", header=TRUE, sep=",")
+Vincent_Grade_5
+```
+
+[Up](#A)  
+
+
+* <a name="2b"/>__Using libraries `dplyr`and `tidyr` I transformed and tidied the data. I created a new table by transforming my original table from "wide" structure to "long" structure. I also separated the last and first names of the students.__
+
+```{r}
+VES <- Vincent_Grade_5 %>%  separate(Student, c("First_Name", "Last_Name")) %>%  arrange(Last_Name)
+VES1 <- VES  %>% gather("Subject", "Scores", 3:7) %>% select(Last_Name, First_Name, Subject, Scores, Days_Present = Days.Present)
+VES1$Subject <- str_replace_all(VES1$Subject, pattern = "\\.", replacement = " ") 
+head(VES1, 15)
+
+```
+
+[Up](#A)  
+
+
+* <a name="2c"/>__I summarized the data in a given class (by subject), by finding the average grade of students and the days they were present in school. The table `VES2` (Vincent Elementary School 2), holds the summary of each class. I also found the average grades of each student by combining their five classes (table `VES3`).__
+
+```{r}
+VES2 <- VES1 %>% group_by(Subject) %>% summarise(Average_Grade=mean(Scores), Average_Days_Present=mean(Days_Present)) %>% data.frame()
+VES2
+VES3 <- VES1 %>% group_by(Last_Name, First_Name) %>% summarise(Average_Grade=mean(Scores), Days_Present=mean(Days_Present)) %>% data.frame()
+VES3
+```
+
+[Up](#A)  
+
+####Part 3:<a name="3a"/>     
+  
+```{r}
+y <- cor(VES1$Scores, VES1$Days_Present)
+y
+```
+    
+* __Using the build in correlation function I found that the correlation between the student's grades and the amount of days they were present in school. I then created two scatter plot with the best fit line. The first graph shows a scatter plot with the grades versus attendance, by student's first name. The second graph is by subject. If we look at the graph below we see that the data is vastly scattered. The correlation is `r y`. The correlation is close to 0, therefore there is no relationship between the student's grade and their attendance.__ 
+
+
+```{r}
+ggplot(data = VES1, aes(x = Scores, y = Days_Present, color=First_Name)) +  geom_point(aes(shape = First_Name)) + theme_igray() + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x) + scale_shape_manual(values = c(1:14)) + ggtitle("Graph 1: Grades Vs Days Present (by student)") + ylab("Days Present") + xlab("Grades")
+
+ggplot(data = VES1, aes(x = Scores, y = Days_Present, color=Subject)) +  geom_point() + scale_colour_tableau()  + theme_solarized(light=FALSE) + ggtitle("Graph 2: Grades Vs. Days Present (by subject)") + geom_smooth(method = "lm", se=FALSE, color="yellow", formula = y ~ x) + ylab("Days Present") + xlab("Grades")
+```
+
+[Up](#A)  
+
+
+* <a name="3b"/>__I found the correlation between students' grade and attendance, by each subject. I created a table and graph with the summary of each subject. In The table we see that English is the only subject where there is a moderate relationship between grades and attendance. It has a negative relationship, meaning that student who have a low attendance rate seem to have higher grades.__
+
+```{r}
+z <- VES1 %>% select(Subject, Scores, Days_Present) %>% group_by(Subject) %>% summarize(Correlation = cor(Scores, Days_Present)) %>% data.frame()
+VES4 <- VES2 %>% left_join(z, by = "Subject")
+kable(VES4, digits = 2, align = "c", caption = "Table 1: Summary of each subject.")
+ggplot(data = VES1, aes(x = Scores, y = Days_Present, color=First_Name)) +  geom_point() + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x) + facet_wrap(~Subject) + theme_igray() + ggtitle("Graph 3: Grades Vs. Days Present in Each subject (by students)") + ylab("Days Present") + xlab("Grades")   
+```
+
+[Up](#A)  
+
+<a name="3c"/>
+```{r}
+kable(VES3, align = "c", caption = "Table 2: Summary of each student.")   
+```
+
+* __Lastly I try to find the correlation between each student's average grade and their attendance. The table above shows each student's name, their average grade and the number of days they were present. Then I find the correlation between the average grade and the attendance. Below I graph their relationship. The correlation between the average grade and attendance is `-0.31`. Meaning they share a weak relationship; students' with higher average seems to have more absence then other students.__
+
+```{r}
+x <- cor(VES3$Average_Grade, VES3$Days_Present)
+x
+ggplot(data = VES3, aes(y = Days_Present, x = Average_Grade, color=First_Name)) +  geom_point() + theme_solarized(light=FALSE) + geom_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + ggtitle("Graph 4: Average Grade Vs. Days Present")+ ylab("Days Present") + xlab("Average Grades") 
+```
+
+
+[Up](#A)  

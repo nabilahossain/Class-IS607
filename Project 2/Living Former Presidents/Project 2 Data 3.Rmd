@@ -1,0 +1,153 @@
+---
+title: "Living Former US Presidents"
+author: "Nabila Hossain"
+date: "October 11, 2015"
+output: html_document
+---
+
+__In this project I used the table found in the following link: <https://en.wikipedia.org/wiki/List_of_Presidents_of_the_United_States#Living_former_presidents>. The table shows the information about living former US presidents.__
+
+
+* __Part 1: Create a .CSV file that includes all of the information above:__
+    * [Install all the packages that will be used in this project.](#1a)  
+    * [Used `rvest` to pull the needed table from online and tidy it.](#1b)    
+    * [Created a .CSV file and uploaded it to GitHub repository.](#1c)   
+* __Part 2: Read the information from your .CSV file into R, and use tidyr and dplyr as needed to tidy and transform your "data":__   
+     * [Read the .CSV file form GitHub.](#2a)  
+     * [Used `dplyr` and `tidyr` packages to transform and tidy the data.](#2b)  
+     * [More tiding and transforming data.](#2c)  
+* __Part 3: Perform analysis on the "data":__   
+     * [Used `knitr` to create table.](#3a)  
+     * [Table that shows the summary of former president by age.](#3b)  
+     * [Overall summary of the living former president.](#3c)      
+
+####Part 1:       
+
+* <a name="1a"/>__Installing all the necessary packages needed for this data analysis.__
+
+```{r}
+library(rvest)
+library(stringr)
+library(curl)
+library(tidyr)
+library(dplyr)
+library(knitr) 
+```
+
+[Up](#A)
+
+
+* <a name="1b"/>__I used `rvest` package to scrape, the table from "Wikipedia," of living former president. This step for me was very hard for me, since I am new to web scraping. After finally getting `r` to load the table I noticed that I had to format the data, since it did not look like the table online. Therefore I used `stringr` to format the data and created the table "LF_President". The new table looked exactly like the table found online.__
+
+```{r}
+url <- read_html("https://en.wikipedia.org/wiki/List_of_Presidents_of_the_United_States", Encoding = "UTF-8")
+table1 <- url %>% html_nodes("table") %>% .[[2]]  %>% html_table()
+table1
+LF_President <- table1
+LF_President$"Term of office" <- str_replace_all(LF_President$"Term of office", pattern = "(\\d{4}).*?(\\d{4})", replacement = "\\1\\-\\2 ") 
+LF_President$"Date of birth" <- LF_President$"Date of birth" %>% str_replace_all(pattern = "\\(\\d{4}\\-\\d{2}\\-\\d{2}\\)", replacement = "") %>% str_replace_all(pattern = "age.\\s", replacement = "age ") 
+LF_President
+
+```
+
+[Up](#A)
+
+* <a name="1c"/>__I created a .CSV file with the living former president table in my local GitHub repository.__
+ 
+
+```{r}
+write.csv(LF_President, file = "C:/Users/Nabila/Documents/GitHub/Class-IS607/Project 2/Living Former Presidents/Living_Former_Presidents.csv")
+```
+
+
+[Up](#A)  
+
+####Part 2:    
+
+* <a name="2a"/>__Using the library `curl` I uploaded the living former president table from my online GitHub repository.__
+
+
+```{r}
+Living_President <- read.csv(file="https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Project%202/Living%20Former%20Presidents/Living_Former_Presidents.csv", header=TRUE, sep=",")
+Living_President
+```
+
+[Up](#A)  
+
+* <a name="2b"/>__Using libraries `dplyr`and `tidyr` I transformed and tidied the data. Since the original table had a lot of data mashed together, I created a new table "Living Former President 1" (LFP1) by transforming the original table. I separated the 3rd and 4th columns into six columns. I originally wanted to separate the president's name in first, last and middle name, however since we have two "George Bush" I thought it would be confusing to study the data with only last or first name.__
+
+```{r}
+LFP1 <- Living_President %>%  separate(Term.of.office, c("Term_Start_Year", "Term_End_Year"), sep = "-") %>% separate(Date.of.birth, c("Y", "Birth_Month", "Birth_Day", "Birth_Year", "Z", "Age"), extra = "drop") %>% select(-X, -Y, -Z)
+LFP1
+
+```
+
+
+[Up](#A)  
+
+
+* <a name="2c"/>__I further transform and tidy the data. I created a table "Living_Former_President," which has the president's birth month in numeric, how many years they served, and their age when they were in term.__
+
+```{r}
+LFP1$Term_End_Year <- as.numeric(LFP1$Term_End_Year)
+LFP1$Term_Start_Year <- as.numeric(LFP1$Term_Start_Year)
+LFP1$Birth_Year <- as.numeric(LFP1$Birth_Year) 
+LFP1$Birth_Day <- as.numeric(LFP1$Birth_Day) 
+LFP1$Birth_Day <- sprintf("%02d", LFP1$Birth_Day)
+LFP1$Age <- as.numeric(LFP1$Age)
+
+Living_Former_President <- LFP1 %>% mutate(Years_In_Term = Term_End_Year - Term_Start_Year) %>% mutate(Age_Start_Term = Term_Start_Year - Birth_Year) %>% mutate(Age_End_Term = Term_End_Year - Birth_Year) %>% mutate(Term_Served = Years_In_Term / 4 )
+
+Living_Former_President$Birth_Month <- Living_Former_President$Birth_Month %>% as.character.Date() %>% str_replace(pattern = "June\\s{1,}", replacement = "6") %>% str_replace(pattern = "October", replacement = "10") %>% str_replace(pattern = "July\\s{1,}", replacement = "7") %>% str_replace(pattern = "August\\s", replacement = "8") %>% as.numeric() 
+
+
+Living_Former_President
+
+```
+
+
+
+####Part 3:    
+
+* <a name="3a"/>__The table below shows the original data that was presented on the website.__ 
+```{r}
+kable(select(Living_President, -X), caption = "Table 1: Original table living former president (online).", align = "c")
+```
+
+
+* __The table below lists the presidents' by their birth date, from oldest to youngest. We see that _George H. W. Bush_ is older then _Jimmy Carter_ even though they both were born in the same year, 1924. We can also see that they both served one term. On the other hand _George W. Bush_ is older then _Bill Clinton_ (they were also born in the same year, 1946) and they both served two terms.__
+
+
+```{r}
+Living_Former_President$Birth_Month <- sprintf("%02d", Living_Former_President$Birth_Month)
+LFP2 <- Living_Former_President %>% select(President, Birth_Month, Birth_Day, Birth_Year, Term_Start_Year, Term_End_Year, Term_Served) %>% arrange( Birth_Year, Birth_Month) %>% unite("Date_of_Birth", Birth_Month, Birth_Day, Birth_Year, sep = "-")
+
+kable(LFP2, caption = "Table 2: Living Former President, Oldest to Youngest, by date.", align = "c")
+```
+
+[Up](#A)  
+  
+
+* <a name="3b"/>__The table below shows the summary of the living former president by age. From this table we learn that the oldest out of the four to take office is _George H. W. Bush_ at the age of 65, while _Bill Clinton_ is the youngest, who became president at the age of 47.__
+
+```{r}
+LFP3 <- Living_Former_President %>% select(President, Age, Age_Start_Term, Age_End_Term, Years_In_Term) 
+
+kable(LFP3, caption = "Table 3: Summary of living former president, by age.", align = "c")
+       
+```
+
+[Up](#A)  
+
+
+* <a name="3c"/>__The table below show the average age and term in years. The average year of a president to start term is 55 and the average age of all the living former president is 80. The average term in years a president held office is 6.__
+
+```{r}
+LFP4 <- Living_Former_President %>% summarise(Age_Started_Term=mean(Age_Start_Term), Age_Ended_Term=mean(Age_End_Term), Age=mean(Age), Years_In_Term=mean(Years_In_Term)) %>% data.frame() %>% gather("Average", "Years", 1:4)
+LFP4
+kable(LFP4, caption = "Table 4: The four living former presidents' summary (average).", align = "c")
+```
+
+
+[Up](#A)  
+

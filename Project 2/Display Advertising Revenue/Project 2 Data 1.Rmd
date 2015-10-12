@@ -1,0 +1,148 @@
+---
+title: "Display Advertising Revenue"
+author: "Nabila Hossain"
+date: "October 11, 2015"
+output: html_document
+---
+
+
+__The chart below describes the display advertising revenue across five companies in five years in billions of dollars. Display advertising is advertisement found in the form of image, videos, rich text and others on the website. One example is Facebook, the ads that are presented on the right columns.__ 
+
+![image](https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Project%202/Display%20Advertising%20Revenue/Display%20Advertising%20Revenue%20by%20Company.png)<a name="A"/>  
+  
+* __Part 1: Create a .CSV file (or optionally, a MySQL database!) that includes all of the information above:__  
+    * [Install all the packages that will be used in this project.](#1a)  
+     * [Creating a "wide" structure table using `sqldf`.](#1b)   
+     * [Creating a .CSV file in GitHub.](#1c)     
+* __Part 2: Read the information from your .CSV file into R, and use tidyr and dplyr as needed to tidy and transform your "data":__   
+     * [Read the .CSV file form GitHub.](#2a)    
+     * [Used `dplyr` and `tidyr` packages to transform and tidy the data.](#2b)  
+     * [Performing more tiding and transformation of the data](#2c)  
+* __Part 3: Perform analysis on the data.__   
+     * [Using `ggplot2` to plot the display advertising revenue of five companies over five years.](#3a)  
+     * [Analyzing the revenue for the five companies and graphing the data.](#3b)  
+     * [Create a table to summarize the display ad revenue of the five companies.](#3c) 
+   
+ 
+
+####Part 1:    
+
+* <a name="1a"/>__Installing all the necessary packages needed for this data analysis.__
+
+
+```{r}
+library(sqldf)
+library(tidyr)
+library(dplyr)
+library(curl)
+library(ggplot2)
+library(RColorBrewer)
+library(ggthemes)
+library(knitr)
+```
+
+* <a name="1b"/>__Created a "wide" structure table using `sqldf`. Changed the row names in the table with the first column and then deleted the first column.__
+
+```{r}
+ad_revenue <-sqldf(c("Drop table if exists revenue","CREATE table revenue ( ID serial PRIMARY KEY, Year int (10) NOT NULL, Google int NULL, Facebook int NULL, Yahoo int NULL, Microsoft int NULL, AOL int NULL)",
+  "INSERT INTO revenue (ID, Year, Google, Facebook, Yahoo, Microsoft, AOL) Values ('1','2009','0.36','0.56', '1.26', '0.37', '0.51'), ('2', '2010','0.86','1.21', '1.43', '0.51', '0.47'), ('3', '2011', '1.67', '1.73', '1.36', '0.6', '0.53'), ('4','2012','2.26','2.18', '1.35','0.9','0.7'), ('5','2013','2.99','3.17','1.27','0.79','0.73')", "Select * From revenue"))
+rownames(ad_revenue) <- ad_revenue[,1]
+ad_revenue <- ad_revenue[,-1]
+ad_revenue
+```
+
+[Up](#A)
+
+* <a name="1c"/>__I created a .CSV file with the display ad revenue table in my local GitHub repository.__
+ 
+
+```{r}
+write.csv(ad_revenue, file = "C:/Users/Nabila/Documents/GitHub/Class-IS607/Project 2/Display Advertising Revenue/Ad_Revenue_Table.csv")
+```
+
+[Up](#A)  
+
+####Part 2:    
+
+* <a name="2a"/>__Using the library `curl` I uploaded the display advertising revenue table from my online GitHub repository.__
+
+```{r}
+display_ad <- read.csv(file="https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Project%202/Display%20Advertising%20Revenue/Ad_Revenue_Table.csv", header=TRUE, sep=",")
+display_ad
+```
+
+[Up](#A)  
+
+
+* <a name="2b"/>__Using libraries `dplyr` and `tidyr` I transformed and tidied the data. I created a new table by transforming my original table from "wide" structure to "long" structure.__
+
+```{r}
+display_ad_revenue <- display_ad %>% select(-X) %>%  gather("Company", "Revenue", 2:6)
+display_ad_revenue
+```
+
+[Up](#A)  
+
+
+* <a name="2c"/>__I transform and tidy the data more. I summarized the data, by finding the total revenue of display advertising by year and created a table `dar1` (display ad revenue 1). Then I combine the tables, to create another table `dar2` that has the revenue from the five companies and the total revenue for each year.__  
+   
+```{r}
+Company <- c("All Five Companies", "All Five Companies", "All Five Companies", "All Five Companies", "All Five Companies")
+dar1 <- display_ad_revenue %>% group_by(Year) %>% summarise(Revenue = sum(Revenue)) %>% cbind(Company) %>% select(Year, Company, Revenue)
+dar1
+dar2 <- display_ad_revenue %>% bind_rows(dar1) %>% arrange(Year)
+dar2
+```
+  
+ *  __I also find the total and the average revenue, by company and create table `dar3`.__
+
+```{r}
+dar3 <- display_ad_revenue %>% group_by(Company) %>% summarise(Total_Revenue = sum(Revenue), Average_Revenue = mean(Revenue)) %>% data.frame()
+dar3
+```
+
+
+[Up](#A)  
+
+####Part 3:    
+
+* <a name="3a"/>__Using `ggplot2` I created a bar graph using table `dar2`. This will help me visualize the display ad revenue by year for each company and combined revenue for all five companies. Looking at the graph I can see that the combined revenue for the five years are steadily increasing from 2009 to 2013. In 2009 and 2010 Yahoo had the most revenue in display ad, then the other three companies. However this changes over time. In 2011 Facebook and Google had more revenue than Yahoo. In 2012 and 2013 Facebook and Google had almost twice the amount of display ad revenue then Yahoo.__ 
+
+```{r}
+ggplot(data = dar2, aes(x = Year, y = Revenue, fill = Company)) + geom_bar(stat ="identity", position="dodge") + scale_fill_brewer(palette = "PuBuGn")  + theme_hc(bgcolor = "darkunica") + scale_colour_hc("darkunica") + ggtitle("Graph 1: Display Advertising Revenue - Throughout the Years") + ylab("Display Ad Revenue in Billions of Dollars")
+```
+
+ * __I created a line graph with display advertising revenues for the five companies over the period of five years. Looking at the graph I can see that the revenue for Google and Facebook has been increasing linearly over five year. On the other hand, the revenue for the revenue for Yahoo has been almost constant, around 1.3 billion dollars.__ 
+  
+```{r}
+ggplot(data = display_ad_revenue, aes(x = Year, y = Revenue, group=Company, color = Company)) + geom_line() + geom_point(aes(shape = Company), size = 3.5) + scale_shape_manual(values = c(7:11)) + theme_igray() + scale_colour_tableau() + theme(legend.position = "top") + ggtitle("Graph 2: Display Ad Revenue across five company in five years") + ylab("Display Ad Revenue in Billions of Dollars")
+```
+
+[Up](#A)  
+
+
+* <a name="3b"/>__The third graph, below shows the total and average revenue for the five companies. Looking at the graph we can see that Google and Facebook have very high total revenue over 8 billion dollars. However their average revenue is closer to 1.5 billion dollars, similar to Yahoo.__
+
+```{r}
+dar4 <- dar3 %>% gather("Revenue", "Dollars", 2:3)
+ggplot(data = dar4, aes(x = Company, y = Dollars, fill = Revenue)) + geom_bar(stat ="identity", position="dodge") + theme_solarized() + scale_fill_brewer(palette = "Accent") + geom_text(aes(label = Dollars), hjust=0.5, vjust=-0.5, size=3) + theme(legend.position = "bottom") + ggtitle("Graph 3: Display Ad Revenue for Five Companies.") + ylab("Billions of Dollars")
+```
+
+[Up](#A)  
+
+
+* <a name="3c"/>__I create a new table using `knitr` to show the display advertising revenue for five companies over five years. The table shows the total revenue by year and the total revenue by company. It also shows the total revenue of all companies over five years. It also has the average revenue of each company and the average revenue as a whole.__
+
+```{r}
+Total_Display_Ad <- dar2 %>% spread(Year, Revenue) %>% data.frame() %>% arrange(desc(Company)) %>% select(Company, "2009"=X2009, "2010"=X2010, "2011"=X2011, "2012"=X2012, "2013"=X2013) %>% left_join(dar3, by = "Company")
+
+Total_Display_Ad$Total_Revenue[is.na(Total_Display_Ad$Total_Revenue)]  <- display_ad_revenue %>% summarise(Total_Revenue = sum(Revenue))
+Total_Display_Ad$Average_Revenue[is.na(Total_Display_Ad$Average_Revenue)]  <- display_ad_revenue %>% summarise(Average_Revenue= mean(Revenue))
+
+Total_Display_Ad$Company[Total_Display_Ad$Company == "All Five Companies"] <-  "Total"
+
+kable(Total_Display_Ad, align = "c", caption = "Table 1: Display Advertising revenue for five companies in five years.")
+```
+
+[Up](#A)  
+
