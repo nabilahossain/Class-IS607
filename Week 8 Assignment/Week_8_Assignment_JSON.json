@@ -1,4 +1,3 @@
-{"catalog": {
 var books = [
    {
     "id":"1",
@@ -23,5 +22,4 @@ var books = [
     "Author":["Charles K. Alexander","Matthew N. O. Sadiku"],
     "Cover_Designer":"Studio Montage",
     "Cover_Art_Image":"Astronauts Repairing Spacecraft"
-  }
-]}};
+  }];
