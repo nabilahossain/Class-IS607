@@ -1,5 +1,6 @@
 {"catalog": {
-var books = [{
+var books = [
+   {
     "id":"1",
     "Title":"Horizons: Exploring the Universe",
     "Edition":"11th",
@@ -23,4 +24,4 @@ var books = [{
     "Cover_Designer":"Studio Montage",
     "Cover_Art_Image":"Astronauts Repairing Spacecraft"
   }
-}]}};
+]}};
