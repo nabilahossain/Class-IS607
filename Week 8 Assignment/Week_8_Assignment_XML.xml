@@ -4,8 +4,8 @@
   <book id="1">
     <Title>Horizons: Exploring the Universe</Title>
     <Edition>11th</Edition>
-    <Author>Michael A. Seeds</Author>
-    <Author>Dana E. Backman</Author>
+    <Author one="Michael A. Seeds"
+      two="Dana E. Backman"/>
     <Cover_Designer>Irene Morris</Cover_Designer>
     <Cover_Art_Image Background="Young stars in the Rho Ophiuchi Cloud"
       Top_Insert="Nebula in the Large Magellanic Cloud"
@@ -24,8 +24,8 @@
   <book id="3">
     <Title>Fundamentals Of Electric Circuits</Title>
     <Edition>4th</Edition>
-    <Author>Charles K. Alexander</Author>
-    <Author>Matthew N. O. Sadiku</Author>
+    <Author one="Charles K. Alexandert"
+       two="Matthew N. O. Sadiku"/>
     <Cover_Designer>Studio Montage</Cover_Designer>
     <Cover_Art_Image>Astronauts Repairing Spacecraft</Cover_Art_Image>
   </book>
