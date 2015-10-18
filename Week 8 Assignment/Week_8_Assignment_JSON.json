@@ -1,0 +1,26 @@
+{"catalog": {
+var books = [{
+    "id":"1",
+    "Title":"Horizons: Exploring the Universe",
+    "Edition":"11th",
+    "Author":["Michael A. Seeds", "Dana E. Backman"],
+    "Cover_Designer":"Irene Morris", 
+    "Cover_Art_Image":["Background: Young stars in the Rho Ophiuchi Cloud","Top_Insert: Nebula in the Large Magellanic Cloud", "Middle_Insert: Gamma-ray burst","Bottom_Insert:Phoenix Mars Lander"]
+  }
+  {
+    "id":"2",
+    "Title":"Concise Notes For Physics",
+    "Edition":"4th",
+    "Author":"Dr. Robert W. Finkel",
+    "Cover_Designer":"Renee Sartell",
+    "Cover_Art_Image":"Pattern 4"
+  }
+  {
+    "id":"2",
+    "Title":"Fundamentals Of Electric Circuits",
+    "Edition":"4th",
+    "Author":["Charles K. Alexander","Matthew N. O. Sadiku"],
+    "Cover_Designer":"Studio Montage",
+    "Cover_Art_Image":"Astronauts’ Repairing Spacecraft"
+  }
+}]};

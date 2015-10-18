@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+ 
+  <book id="1">
+    <Title>Horizons: Exploring the Universe</Title>
+    <Edition>11th</Edition>
+    <Author>Michael A. Seeds</Author>
+    <Author>Dana E. Backman</Author>
+    <Cover_Designer>Irene Morris</Cover_Designer>
+    <Cover_Art_Image Background="Young stars in the Rho Ophiuchi Cloud"
+      Top_Insert="Nebula in the Large Magellanic Cloud"
+      Middle_Insert="Gamma-ray burst"
+      Bottom_Insert="Phoenix Mars Lander"/>
+  </book>
+
+  <book id="2">
+    <Title>Concise Notes For Physics</Title>
+    <Edition>4th</Edition>
+    <Author>Dr. Robert W. Finkel</Author>
+    <Cover_Designer>Renee Sartell</Cover_Designer>
+    <Cover_Art_Image>Pattern 4</Cover_Art_Image>
+  </book>
+
+  <book id="3">
+    <Title>Fundamentals Of Electric Circuits</Title>
+    <Edition>4th</Edition>
+    <Author>Charles K. Alexander</Author>
+    <Author>Matthew N. O. Sadiku</Author>
+    <Cover_Designer>Studio Montage</Cover_Designer>
+    <Cover_Art_Image>Astronauts’ Repairing Spacecraft</Cover_Art_Image>
+  </book>
+
+</catalog>
