@@ -21,6 +21,6 @@ var books = [{
     "Edition":"4th",
     "Author":["Charles K. Alexander","Matthew N. O. Sadiku"],
     "Cover_Designer":"Studio Montage",
-    "Cover_Art_Image":"Astronauts’ Repairing Spacecraft"
+    "Cover_Art_Image":"Astronauts Repairing Spacecraft"
   }
-}]};
+}]}};
