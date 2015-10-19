@@ -1,0 +1,87 @@
+---
+title: "Week 8 Assignment"
+author: "Nabila Hossain"
+date: "October 18, 2015"
+output: html_document
+---
+
+####Assignment: Pick three of your favorite books on one of your favorite subjects. Take the information that you've selected about these three books, and separately create three files which store the book's information in HTML (using an html table), XML, and JSON formats file.
+
+__I choose three nonfiction books that I used during my undergraduate years, as a Physics student. I choose five attributes for each of the books, including the title and the author(s). The other three attributes relate to the front cover of the books. I obtained the information about the books' title, edition, author, cover designer and cover art/image. Then I created three (HTML, XML, and JSON) files "by hand" and stored the book's information in them separately.__  
+
+* [Install all the packages that will be used in this project.](#1a)  
+* [Link to the HTML file online.](#1b)   
+* [Uploading the HTML file.](#1c)  
+* [Link to the XML file online.](#1d)   
+* [Uploading the XML file.](#1e)   
+* [Link to the file online.](#1f)  
+* [Uploading the JSON file.](#1g)   
+* [Conclusion](#1h)   
+    
+
+
+* <a name="1a"/>__Installing all the necessary packages needed for this data analysis.__
+
+```{r}
+library(devtools)
+devtools::install_github("crubba/htmltab")
+library(htmltab)
+library(XML)
+library(RCurl)
+library(plyr)
+library(jsonlite)
+```
+
+
+
+* <a name="1b"/>__Below is image of the HTML table that I created using HTML format. I am also including the link to the original code.__
+ 
+![image](https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Week%208%20Assignment/Week_8_Assignment_HTML.png)  
+
+[HTML File Link:](https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_HTML.html) <https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_HTML.html>
+
+* <a name="1c"/>__Using the package `htmltab` I uploaded the table HTML table that I created in the file from online. Since we just had to upload the data from online, I did not tidy or transform the table.__
+
+
+```{r}
+u1 <- "https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Week%208%20Assignment/Week_8_Assignment_HTML.html"
+books1<-  htmltab(doc = u1) 
+books1
+```
+
+
+* <a name="1d"/>__Below I am including the link to the XML file that I created "by hand", with the information about the three nonfiction books.__
+
+[XML File Link:](https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_XML.xml)
+<https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_XML.xml>
+
+* <a name="1e"/>__Using the `XML`, `RCurl` and `plyr` packages I uploaded the XML file from online. Using the XML file I created a table (data frame) below. Since we just had to upload the data from online, I did not tidy or transform the table.__
+
+```{r}
+u2 <- getURL("https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Week%208%20Assignment/Week_8_Assignment_XML.xml")
+xmlt1 <- htmlParse(u2, asText=TRUE)
+books2 <- ldply(xmlToList(xmlt1), data.frame)
+books2
+```
+
+
+* <a name="1f"/>__Below I am including the link to the JSON file that I created "by hand", with the information about the three books.__
+
+[XML File Link:](https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_JSON.json)
+<https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_JSON.json>
+
+* <a name="1g"/>__Using the package `jsonlite` I uploaded the JSON file from online. Using the file I created a table (data frame) below. Since we just had to upload the data from online, I did not tidy or transform the table.__
+
+```{r}
+jf <- "https://raw.githubusercontent.com/nabilahossain/Class-IS607/master/Week%208%20Assignment/Week_8_Assignment_JSON.json"
+books3 <- fromJSON(jf, flatten = FALSE)
+books3
+```
+
+
+####Conclusion:
+
+* <a name="1h"/>__Even though I used the same information for the three files (HTML, XLM, and JSON), they are not the same. When I uploaded the files into data frames into `r` they all look different. The HTML table has nine rows and five columns. The second one (XML) data frame has 4 rows and 19 columns. The data frame that I created using JSON has 3 rows and 5 columns. The HTML data frame is the tidiest looking table then the others. The XML data frame had to be transformed and tidied the most.__
+
+
+
