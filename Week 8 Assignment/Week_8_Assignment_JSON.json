@@ -1,4 +1,4 @@
-var books = [
+[
    {
     "id":"1",
     "Title":"Horizons: Exploring the Universe",
