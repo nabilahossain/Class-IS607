@@ -7,7 +7,7 @@ output: html_document
 
 ####Your task is to choose one of the New York Times APIs, construct an interface in R to read in the JSON data, and transform it to an R dataframe.
 
-__I choose _The BOOK API_ from The New York Times web site: <http://developer.nytimes.com/docs>. I obtained (by registering) an API key from the web site. Then I used the instruction found in [Books API: Best Sellers](https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_JSON.json) Link: <http://developer.nytimes.com/docs/books_api/Books_API_Best_Sellers> to read the file into R and create a dataframe.__
+<a name="a"/>__I choose _The BOOK API_ from The New York Times web site: <http://developer.nytimes.com/docs>. I obtained (by registering) an API key from the web site. Then I used the instruction found in [Books API: Best Sellers](https://github.com/nabilahossain/Class-IS607/blob/master/Week%208%20Assignment/Week_8_Assignment_JSON.json) Link: <http://developer.nytimes.com/docs/books_api/Books_API_Best_Sellers> to read the file into R and create a dataframe.__
 
  
 * [Use `jsonlite` package to obtain the list names.](#1a)  
